@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Opening Lab | Simulador de mãos de Commander</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1017;--panel:#141c27;--panel2:#1b2634;--line:#304053;--fg:#eff4fb;--sub:#aab7c9;--blue:#70c2ff;--mint:#78ddc0;--gold:#edc68b;--red:#e98f8f}
+*{box-sizing:border-box}body{font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(1200px 850px at 78% -250px,#18304b,var(--bg));color:var(--fg);margin:0}
+.shell{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:32px 0 70px}
+.eyebrow{color:var(--mint);font-size:12px;text-transform:uppercase;letter-spacing:.2em;font-weight:750}
+h1{font-size:clamp(28px,4vw,44px);font-weight:790;letter-spacing:-.04em;margin:4px 0 6px}h2{font-size:20px;margin:0 0 12px;letter-spacing:-.02em}h3{font-size:15px;margin:0 0 10px}p{color:var(--sub);margin:0 0 16px}.top{display:flex;gap:24px;align-items:end;justify-content:space-between;flex-wrap:wrap;margin-bottom:24px}
+.small{font-size:12px;color:var(--sub)}.tag{border:1px solid var(--line);border-radius:99px;padding:5px 11px;color:var(--sub);font-size:12px}
+.layout{display:grid;grid-template-columns:minmax(310px,.93fr) minmax(420px,1.3fr);gap:18px;align-items:start}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 30px #0002}
+textarea{width:100%;min-height:290px;resize:vertical;background:#0d1520;border:1px solid #34465b;border-radius:12px;padding:13px;color:var(--fg);font:12.5px/1.5 ui-monospace,Consolas,monospace;outline:none}
+textarea:focus,input:focus,select:focus{border-color:var(--blue);outline:none}input,select{background:#0d1520;border:1px solid #34465b;color:var(--fg);padding:10px;border-radius:9px;min-width:0;width:100%}
+button{background:var(--blue);border:0;color:#0a1723;font-weight:750;border-radius:10px;padding:12px 15px;cursor:pointer;transition:filter .15s}button:hover{filter:brightness(1.12)}button.ghost{background:#253446;color:var(--fg);border:1px solid #3d5067}button:disabled{opacity:.5;cursor:default}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:16px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--sub)}.checkline{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--fg)}.checkline input{width:auto;accent-color:var(--mint)}
+.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.statgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 18px}.stat{padding:14px;background:var(--panel2);border:1px solid #29394b;border-radius:13px}.stat b{display:block;font-size:25px;line-height:1.25;letter-spacing:-.035em}.stat span{font-size:12px;color:var(--sub)}
+.chartRow{display:grid;grid-template-columns:45px 1fr 52px;align-items:center;gap:12px;margin:9px 0}.barbg{height:15px;background:#29384a;border-radius:6px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#558ebf,#80dfc8);min-width:0;border-radius:5px}.caption{font-size:12px;color:var(--sub)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.rule{height:1px;background:var(--line);margin:20px 0}.sampleHand{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.sampleCard{border:1px solid #35475b;border-radius:9px;padding:8px;background:#1b2a3b;min-height:66px;font-size:11px;line-height:1.35;overflow-wrap:anywhere}.sampleCard.land{border-color:#557654;background:#1a2b2a}.sampleCard small{display:block;font-size:10px;color:var(--sub);margin-top:4px}.pills{display:flex;gap:7px;flex-wrap:wrap}.pill{padding:4px 9px;border:1px solid #40516a;border-radius:20px;font-size:12px}.note{background:#122835;border-left:3px solid var(--mint);padding:12px 14px;border-radius:0 9px 9px 0;color:#c9e1ec;font-size:13px}.danger{background:#382327;border-left-color:var(--red);color:#f0cece}.muted{color:var(--sub)}#results{min-height:490px}.twoline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.twoline .stat{padding:11px 13px}.resultsFooter{margin-top:24px}.advanced{margin-top:13px;border-top:1px solid var(--line);padding-top:13px}.advanced summary{cursor:pointer;color:var(--mint)}.colorrow{display:grid;grid-template-columns:32px 1fr 53px;gap:9px;align-items:center;margin:7px 0}.dot{font-weight:750;font-size:13px}.progress{height:10px;background:#2b3d50;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:#8bbcd9;border-radius:99px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}@media(max-width:540px){.statgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.controls{grid-template-columns:1fr}.sampleHand{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:16px}}
+
+.ruleConfig{margin-top:16px;padding:17px;border:1px solid #3a5365;background:linear-gradient(135deg,#172938,#16212d);border-radius:13px}
+.ruleConfig h3{letter-spacing:.01em;font-size:15px}.ruleConfig p strong{color:#d8e4ed}
+.rules{display:flex;flex-direction:column;gap:10px}.ruleRow{border:1px solid #344b5c;background:#111c28;border-radius:11px;padding:11px}
+.ruleTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.ruleTop span{color:var(--mint);font-size:12px;font-weight:750}
+.ruleControls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 70px 70px;gap:8px;align-items:end}
+.ruleControls label{font-size:11px;color:var(--sub);display:flex;flex-direction:column;gap:4px}
+.ruleControls input,.ruleControls select{padding:8px;width:100%}.mini{padding:6px 10px;font-size:11px}.ruleRemove{border:0;background:none;color:#e8acac;padding:3px 7px;font-size:12px}
+.warnText{color:var(--gold);margin:8px 0 0}.progressTrack{margin:10px 0;font-size:12px;color:var(--mint)}
+.ruleBreakdown{display:grid;gap:8px}.failure{display:grid;grid-template-columns:minmax(0,1fr) 57px;gap:9px;align-items:center}
+.failureRow{display:flex;justify-content:space-between;gap:9px}.resultDivider{border-top:1px solid var(--line);padding-top:15px;margin-top:16px}
+@media(max-width:540px){.ruleControls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ruleMana{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px;max-width:360px}
+.ruleMana label{display:flex;flex-direction:column;gap:4px;color:var(--sub);font-size:11px}
+.ruleMana select{padding:7px}
+code{color:#b2dcef}
+</style></head><body><main class="shell">
+<header class="top"><div><div class="eyebrow">Commander · Monte Carlo</div><h1>Opening Lab</h1><p>Teste milhares de mãos iniciais, sem sair do navegador. Importa listas do Archidekt.</p></div><span class="tag">v0.3 · Filtros por custo · 100% local</span></header>
+<div class="layout">
+<section class="card">
+<div class="flex" style="justify-content:space-between"><h2>1. Cole seu deck</h2><button class="ghost" id="loadDefault" style="padding:7px 10px;font-size:12px">Restaurar Ramos</button></div>
+<p class="small">Aceita quantidades <code>1x</code> ou <code>1</code>, edições, categorias, tags e marcações de Commander, Sideboard e Maybeboard.</p>
+<textarea id="deckInput" spellcheck="false" aria-label="Lista de cartas"></textarea>
+<div class="flex" style="margin-top:10px"><label class="tag" style="cursor:pointer">Importar .txt<input id="fileInput" type="file" accept=".txt,.csv,text/plain" style="display:none"></label><span class="small" id="parseStatus"></span></div>
+<div class="controls">
+ <div class="field"><label for="runs">Quantidade de mãos simuladas</label><input id="runs" type="number" min="100" max="200000" step="100" value="1000" inputmode="numeric"><span class="small">Entre 100 e 200.000</span></div>
+ <div class="field"><label for="seed">Semente (resultados reproduzíveis)</label><input id="seed" type="number" value="20261025"></div>
+</div>
+<div class="ruleConfig" aria-label="Condições para manter mão">
+ <div class="flex" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Critérios de keep</h3><span class="small">As condições são cumulativas (E)</span></div>
+ <p class="small" style="margin:7px 0 12px">A mão precisa cumprir a faixa de terrenos <strong>e</strong> cada regra de categorias. Dentro de uma regra, duas categorias funcionam como <strong>OU</strong>. Cada carta conta uma vez por regra.</p>
+ <div class="controls" style="margin:0">
+  <div class="field"><label for="minL">Terrenos: mínimo</label><input id="minL" type="number" min="0" max="7" value="2"></div>
+  <div class="field"><label for="maxL">Terrenos: máximo</label><input id="maxL" type="number" min="0" max="7" value="4"></div>
+ </div>
+ <div class="flex" style="margin:12px 0 8px"><span class="small" style="font-weight:650">Regras de categorias</span><span class="small" id="catSummary"></span></div>
+ <div id="categoryRules" class="rules" aria-live="polite"></div>
+ <div class="flex" style="margin-top:10px"><button id="addRule" class="ghost mini" type="button">+ Adicionar regra</button><button id="presetBalanced" class="ghost mini" type="button">Exemplo: Ramp ou Draw</button><button id="clearRules" class="ghost mini" type="button">Só terrenos</button></div>
+ <p id="ruleWarnings" class="small warnText" aria-live="polite"></p>
+</div>
+<label class="checkline"><input type="checkbox" id="mulligan"> Uma tentativa de mulligan gratuito se a primeira mão falhar <span class="small">(7 cartas novamente)</span></label>
+<div class="flex"><button id="simulate">Simular mãos</button><button id="cancelRun" class="ghost" hidden>Cancelar</button><button class="ghost" id="export" disabled>Exportar CSV</button></div>
+<div class="progressTrack" id="simProgress" hidden role="status" aria-live="polite"></div>
+<details class="advanced"><summary>Valores de mana das cartas (opcional para filtros por custo)</summary>
+<p class="small" style="margin-top:8px">O texto exportado do Archidekt não informa valor de mana. Cadastre aqui os valores de mana (MV) das cartas que deseja filtrar. Uma por linha, no formato <code>Nome da carta = 2</code>. Cartas sem valor cadastrado <strong>não satisfazem filtros de custo</strong>.</p>
+<textarea id="manaValues" spellcheck="false" style="min-height:130px" placeholder="Atarka's Command = 2&#10;Growth Spiral = 2&#10;Faeburrow Elder = 3"></textarea>
+<div class="flex" style="margin-top:8px"><button type="button" class="ghost mini" id="loadSampleMana">Usar custos conhecidos do Ramos</button><button type="button" class="ghost mini" id="clearMana">Limpar custos</button></div>
+<p id="manaSummary" class="small" style="margin-top:8px"></p>
+</details>
+<details class="advanced"><summary>Terrenos não reconhecidos (opcional)</summary><p class="small" style="margin-top:8px">Informe um nome por linha para classificar um terreno que o protótipo não reconheça. O app conhece os terrenos do Ramos e vários staples, mas ainda não consulta bancos de cartas.</p><textarea id="extras" placeholder="Ex.: Minha Land Especial" style="min-height:65px"></textarea></details>
+<p class="small" style="margin-top:14px">O exemplo usa o Ramos com 37 terrenos. A análise por categorias depende das etiquetas importadas do Archidekt. Para filtrar por valor de mana, cadastre custos no painel opcional; o app não inventa custos ausentes.</p>
+</section>
+<section class="card" id="results"><h2>2. Resultados</h2><div id="placeholder"><p>Carreguei um exemplo do Ramos. Configure o que torna uma mão keepável e clique em <b>Simular mãos</b>.</p><div class="note">Nesta fase, o app simula compras e categorias, <b>não</b> decide automaticamente quais mágicas podem ser conjuradas. O acesso a cores e o efeito de terrenos virados ainda são estimativas simplificadas.</div></div><div id="content" hidden></div></section>
+</div>
+<div class="resultsFooter card" style="margin-top:18px"><h3>O que este protótipo mede, e o que ainda não mede</h3><div class="grid2"><div><p><strong style="color:var(--fg)">Mede</strong>: distribuição inicial de terrenos, critérios de keep por categorias e valor de mana, uma tentativa de mulligan gratuito, motivos de rejeição, fontes de mana potenciais e frequência de terrenos vistos até os turnos 4 e 6.</p></div><div><p><strong style="color:var(--fg)">Ainda não mede</strong>: conjurabilidade real, custos coloridos das mágicas, terrenos virados, Borderposts retornando básicos, habilidades de ramp, tutores, spells, decisões de jogo, interação adversária ou chance efetiva de conjurar Ramos no turno 4.</p></div></div><p class="small" style="margin:0">No Commander multiplayer, a primeira tentativa de mulligan é gratuita e todos compram no próprio turno inicial. O protótipo implementa só uma tentativa gratuita opcional, sem decisões complexas de colocar cartas no fundo.</p></div>
+</main>
+<script>
+"use strict";
+const defaultDeck="1x Abzan Charm [Removal,Draw,+1/+1]\n1x Atarka's Command [Ramp]\n1x Beledros Witherbloom [Tokens]\n1x Boros Charm [Protection]\n1x Bring to Light [Tutor]\n1x Brokers Charm [Removal,Draw]\n1x Conflux [Tutor]\n1x Congregation at Dawn [Tutor]\n1x Crackling Doom [Removal]\n1x Cruel Ultimatum [Draw,Removal]\n1x Deathsprout [Removal,Ramp]\n1x Dina's Guidance [Tutor]\n1x Eerie Ultimatum [Recursion]\n1x Embrace the Paradox [Ramp,Draw]\n1x Escape to the Wilds [Ramp,Draw]\n1x Faeburrow Elder [Ramp]\n1x Fieldmist Borderpost [Ramp,Fixing]\n1x Firemind's Research [Draw]\n1x Firewild Borderpost [Ramp,Fixing]\n1x Galazeth Prismari [Ramp]\n1x Genesis Ultimatum [Payoff,Value]\n1x Golgari Charm [Removal,Protection]\n1x Growth Spiral [Draw,Ramp]\n1x Inevitable Defeat [Removal]\n1x Inspired Ultimatum [Draw,Removal]\n1x Izzet Charm [Removal,Draw]\n1x Konstrari Charm [Ramp]\n1x Lorehold, the Historian [Draw]\n1x Maestros Charm [Draw,Removal]\n1x Manamorphose [Draw,Fixing]\n1x Mirari's Wake [Ramp]\n1x Mistvein Borderpost [Ramp,Fixing]\n1x Naya Charm [Recursion,Removal]\n1x Niv-Mizzet Reborn [Draw]\n1x Niv-Mizzet, Guildpact [Draw,Removal]\n1x Obzedat's Aid [Recursion]\n1x Planar Genesis [Ramp]\n1x Primevals' Glorious Rebirth [Recursion]\n1x Prismari Charm [Draw,Removal]\n1x Prismari Command [Ramp,Draw,Removal]\n1x Prismari, the Inspiration [Copy]\n1x Quandrix Command [Removal,+1/+1]\n1x Quandrix, the Proof [Draw]\n1x Ramos, Dragon Engine [Commander{top}]\n1x Repudiate // Replicate [Copy]\n1x Resonating Lute [Ramp,Draw]\n1x Rivaz of the Claw [Ramp]\n1x Ruinous Ultimatum [Removal]\n1x Shadrix Silverquill [Draw,Tokens]\n1x Silverquill, the Disputant [Copy]\n1x Simic Charm [Protection,Removal]\n1x Sultai Charm [Draw,Removal]\n1x Tanazir Quandrix [+1/+1]\n1x Temur Charm [Removal]\n1x Trap Essence [Removal,+1/+1]\n1x Two-Headed Hellkite [Draw]\n1x Veinfire Borderpost [Ramp,Fixing]\n1x Velomachus Lorehold [Value]\n1x Vigorbloom Charm [Protection,Draw,Removal]\n1x Wargate [Tutor,Ramp]\n1x Whirlwind of Thought [Draw]\n1x Wildfield Borderpost [Ramp,Fixing]\n1x Witherbloom, the Balancer [Ramp]\n1 Canopy Vista\n1 Cascading Cataracts\n1 Cinder Glade\n1 Command Tower\n1 Crystal Quarry\n1 Evolving Wilds\n1 Exotic Orchard\n1 Fabled Passage\n4 Forest\n1 Frontier Bivouac\n6 Island\n1 Jungle Shrine\n5 Mountain\n1 Opulent Palace\n1 Path of Ancestry\n2 Plains\n1 Prairie Stream\n1 Sandsteppe Citadel\n1 Seaside Citadel\n1 Smoldering Marsh\n3 Swamp\n1 The World Tree";
+const $=id=>document.getElementById(id), fmt=n=>n.toLocaleString('pt-BR'), pct=(n,N)=>N?((100*n/N).toFixed(1).replace('.',',')+'%'):'—';
+const key=s=>s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const all=['W','U','B','R','G'];
+const LAND_COLORS={
+ 'plains':'W','island':'U','swamp':'B','mountain':'R','forest':'G',
+ 'arcane sanctum':'WUB','adarkar wastes':'WU','caves of koilos':'WB','choked estuary':'UB','deserted beach':'WU', 'drowned catacomb':'UB','glacial fortress':'WU','hall of heliods generosity':'','isolated chapel':'WB','port town':'WU','reliquary tower':'','shipwreck marsh':'UB','sunken hollow':'UB','temple of deceit':'UB','temple of enlightenment':'WU','temple of silence':'WB','prairie stream':'WU',
+ 'canopy vista':'WG','cascading cataracts':'','cinder glade':'RG','command tower':'WUBRG','crystal quarry':'','evolving wilds':'WUBRG','exotic orchard':'WUBRG','fabled passage':'WUBRG','frontier bivouac':'URG','jungle shrine':'RGW','opulent palace':'UBG','path of ancestry':'WUBRG','sandsteppe citadel':'WBG','seaside citadel':'GWU','smoldering marsh':'BR','the world tree':'G','mystic gate':'WU',
+ 'battlefield forge':'WR','llanowar wastes':'BG','underground river':'UB', 'temple garden':'WG','watery grave':'UB','godless shrine':'WB','steam vents':'UR','sacred foundry':'RW','overgrown tomb':'BG','breeding pool':'GU','blood crypt':'BR','hallowed fountain':'WU','stomping ground':'RG',
+ 'city of brass':'WUBRG','mana confluence':'WUBRG','reflecting pool':'WUBRG','unclaimed territory':'WUBRG','secluded courtyard':'WUBRG','ancient ziggurat':'WUBRG','spires of industry':'WUBRG','interplanar beacon':'WUBRG'
+};
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const NON_CATEGORIES = new Set(['commander','sideboard','maybeboard','nodeck','token','tokens & extras']);
+const BASIC_LANDS = new Set(['forest','island','swamp','mountain','plains','wastes']);
+const RAMOS_MANA_SAMPLE=`Atarka's Command = 2
+Deathsprout = 4
+Escape to the Wilds = 5
+Faeburrow Elder = 3
+Fieldmist Borderpost = 3
+Firewild Borderpost = 3
+Galazeth Prismari = 4
+Growth Spiral = 2
+Konstrari Charm = 2
+Mirari's Wake = 5
+Mistvein Borderpost = 3
+Planar Genesis = 2
+Prismari Command = 3
+Rivaz of the Claw = 3
+Veinfire Borderpost = 3
+Wildfield Borderpost = 3
+Manamorphose = 2
+Wargate = 3`;
+function parseManaValues(){
+ const values=new Map(),errors=[];
+ for(const [i,line] of $('manaValues').value.split(/\r?\n/).entries()){
+  if(!line.trim()||line.trim().startsWith('#'))continue;
+  const m=line.trim().match(/^(.+?)\s*=\s*(\d+(?:\.\d+)?)$/);
+  if(!m||!m[1].trim()||!Number.isFinite(Number(m[2]))||Number(m[2])>30){errors.push(i+1);continue;}
+  values.set(key(m[1].trim()),Number(m[2]));
+ }
+ return {values,errors};
+}
+function updateManaSummary(){
+ const {values,errors}=parseManaValues();
+ const cards=(currentParsed?.library||[]).filter(c=>!c.land);
+ const covered=cards.filter(c=>values.has(key(c.name))).length;
+ $('manaSummary').textContent=`${covered} de ${cards.length} mágicas não terreno com custo conhecido`+(errors.length?` · Linhas inválidas: ${errors.join(', ')}`:'');
+}
+
+function parseDeck(){
+ const manaMap=parseManaValues().values;
+ const extra=new Set($('extras').value.split(/[,\n]/).map(key).filter(Boolean));
+ let section='main',cards=[],skipped=[];
+ for(const rawLine of $('deckInput').value.split(/\r?\n/)){
+  let line=rawLine.trim();if(!line)continue;
+  if(/^(commander|commanders|maybeboard|sideboard|deck|mainboard|decklist)\s*:??\s*$/i.test(line)){
+    section=/commander/i.test(line)?'commander':/maybe/i.test(line)?'maybe':/side/i.test(line)?'side':'main';continue;
+  }
+  let m=line.match(/^(\d+)\s*x?\s+(.+)$/i);if(!m){skipped.push(line);continue;}
+  let qty=Number(m[1]);if(qty<1||qty>250){skipped.push(line);continue;}
+  const raw=m[2];
+  const catRaw=[...raw.matchAll(/\[([^\]]+)\]/g)].flatMap(x=>x[1].split(',').map(x=>x.trim()).filter(Boolean));
+  const categories=[...new Set(catRaw.filter(x=>!NON_CATEGORIES.has(key(x))&&!/^(commander|maybeboard)(?:\{|$)/i.test(x)))];
+  const comm=/commander\b/i.test(catRaw.join(' '))||section==='commander';
+  const excluded=catRaw.some(x=>/^(sideboard|maybeboard|nodeck)/i.test(x))||section==='side'||section==='maybe';
+  const name=raw.replace(/\s*\^[\s\S]*$/,'').replace(/\[[^\]]*\]/g,'').replace(/\*F\*/ig,'').replace(/\s*\([a-z0-9]{2,8}\)(?:\s+[0-9A-Za-z-]+)?\s*$/i,'').trim();
+  if(!name){skipped.push(line);continue;}
+  const kl=key(name);
+  const land=BASIC_LANDS.has(kl)||extra.has(kl)||Object.prototype.hasOwnProperty.call(LAND_COLORS,kl)||categories.some(x=>['land','lands','terreno','terrenos'].includes(key(x)));
+  cards.push({name,qty,land,colors:LAND_COLORS[kl]||'',comm,excluded,categories,catKeys:categories.map(key),ramp:categories.some(x=>key(x)==='ramp'),manaValue:manaMap.has(kl)?manaMap.get(kl):null});
+ }
+ const active=cards.filter(c=>!c.excluded), library=active.filter(c=>!c.comm);
+ const n=active.reduce((s,c)=>s+c.qty,0),landCount=library.filter(c=>c.land).reduce((s,c)=>s+c.qty,0);
+ const cmdCount=active.filter(c=>c.comm).reduce((s,c)=>s+c.qty,0);
+ const counts=new Map(),names=new Map();let noCat=0;
+ for(const c of library){if(!c.land&&c.categories.length===0)noCat+=c.qty;
+  for(const cat of c.categories){const k=key(cat);if(NON_CATEGORIES.has(k))continue;counts.set(k,(counts.get(k)||0)+c.qty);if(!names.has(k))names.set(k,cat);}}
+ const cats=[...counts].map(([k,count])=>({key:k,label:names.get(k),count})).sort((a,b)=>a.label.localeCompare(b.label,'pt-BR'));
+ const unknownLands=library.filter(c=>c.land&&!Object.hasOwn(LAND_COLORS,key(c.name))).map(c=>c.name);
+ return {cards,active,library,n,landCount,cmdCount,skipped,unknownLands,cats,noCat};
+}
+function describeDeck(parsed){
+ let parts=[`${parsed.n} cartas (${parsed.landCount} terrenos · ${parsed.cmdCount} comandante)`];
+ if(parsed.n!==100)parts.push('Esperadas: 100');
+ if(parsed.cmdCount!==1)parts.push('Confira a marcação [Commander{top}]');
+ if(parsed.unknownLands.length)parts.push(`Terrenos sem cores mapeadas: ${parsed.unknownLands.join(', ')}`);
+ if(parsed.skipped.length)parts.push(`${parsed.skipped.length} linha(s) ignorada(s)`);
+ $('parseStatus').textContent=parts.join(' · ');
+ $('catSummary').textContent=`${parsed.cats.length} categorias encontradas · ${parsed.noCat} cartas sem categoria`;
+}
+let currentParsed=null, ruleCounter=0, rules=[],lastResults=null,lastParsed=null,simToken=0;
+function prng(seed){let a=(seed>>>0)||1;return function(){a+=0x6D2B79F5;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;};}
+function shuffle(deck,rng){const a=deck.slice();for(let i=a.length-1;i>0;i--){let j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function bar(label,n,total,scale=100){let p=total?100*n/total:0;return `<div class="chartRow"><span class="small">${escapeHtml(label)}</span><div class="barbg"><div class="bar" style="width:${Math.min(100,p/scale*100)}%"></div></div><strong class="small" style="text-align:right">${pct(n,total)}</strong></div>`;}
+function stat(value,label){return `<div class="stat"><b>${value}</b><span>${escapeHtml(label)}</span></div>`;}
+function cardMatches(card,rule){
+ const categoryMatch=card.catKeys.includes(rule.first)||(rule.second&&card.catKeys.includes(rule.second));
+ if(!categoryMatch)return false;
+ if(rule.mvMin===''&&rule.mvMax==='')return true;
+ return card.manaValue!==null&&(rule.mvMin===''||card.manaValue>=Number(rule.mvMin))&&(rule.mvMax===''||card.manaValue<=Number(rule.mvMax));
+}
+function eligible(hand,config){
+ const lands=hand.filter(c=>c.land).length;
+ const landPass=lands>=config.minL&&lands<=config.maxL;
+ const ruleCounts=config.rules.map(r=>hand.filter(c=>cardMatches(c,r)).length);
+ const rulePass=ruleCounts.map((v,i)=>v>=config.rules[i].min&&v<=config.rules[i].max);
+ return {pass:landPass&&rulePass.every(Boolean),landPass,rulePass,ruleCounts,lands};
+}
+function categoryOptions(selected,allowNone){
+ let options=allowNone?'<option value="">Nenhuma</option>':'';
+ const all=currentParsed?.cats||[];
+ if(selected&&!all.some(c=>c.key===selected))options+=`<option value="${escapeHtml(selected)}" selected>⚠ ${escapeHtml(selected)} (ausente)</option>`;
+ options+=all.map(c=>`<option value="${escapeHtml(c.key)}" ${selected===c.key?'selected':''}>${escapeHtml(c.label)} (${c.count})</option>`).join('');
+ return options;
+}
+function renderRules(){
+ $('categoryRules').innerHTML=rules.length?rules.map((r,i)=>`<div class="ruleRow" data-rule="${r.id}">
+ <div class="ruleTop"><span>Regra ${i+1}</span><button type="button" class="ruleRemove" data-remove="${r.id}" aria-label="Remover regra ${i+1}">Remover ×</button></div>
+ <div class="ruleControls">
+ <label>Categoria A<select data-field="first">${categoryOptions(r.first,false)}</select></label>
+ <label>OU categoria B<select data-field="second">${categoryOptions(r.second,true)}</select></label>
+ <label>Mínimo<input data-field="min" type="number" min="0" max="7" value="${r.min}"></label>
+ <label>Máximo<input data-field="max" type="number" min="0" max="7" value="${r.max}"></label>
+ </div>
+ <div class="ruleMana">
+ <label>MV mínimo<select data-field="mvMin"><option value="" ${r.mvMin===''?'selected':''}>Qualquer</option>${Array.from({length:17},(_,n)=>`<option value="${n}" ${r.mvMin===String(n)?'selected':''}>${n}</option>`).join('')}</select></label>
+ <label>MV máximo<select data-field="mvMax"><option value="" ${r.mvMax===''?'selected':''}>Qualquer</option>${Array.from({length:17},(_,n)=>`<option value="${n}" ${r.mvMax===String(n)?'selected':''}>${n}</option>`).join('')}</select></label>
+ </div></div>`).join(''):'<p class="small" style="margin:0">Nenhuma regra adicional. Apenas a faixa de terrenos define o keep.</p>';
+ warnRules();
+}
+function warnRules(){
+ const unknown=rules.filter(r=>!currentParsed?.cats.some(c=>c.key===r.first));
+ const extra=rules.flatMap(r=>r.second&&!currentParsed?.cats.some(c=>c.key===r.second)?[r.second]:[]);
+ const warnings=[];
+ if(unknown.length||extra.length)warnings.push('Regra com categoria ausente da lista: '+[...new Set([...unknown.map(r=>r.first),...extra])].join(', ')+'.');
+ if(currentParsed?.noCat)warnings.push(`${currentParsed.noCat} mágicas sem categoria não atendem a critérios funcionais.`);
+ const costRules=rules.filter(r=>r.mvMin!==''||r.mvMax!=='');
+ const incomplete=costRules.map(r=>{
+  const candidates=(currentParsed?.library||[]).filter(c=>c.catKeys.includes(r.first)||(r.second&&c.catKeys.includes(r.second)));
+  const missing=candidates.filter(c=>c.manaValue===null).map(c=>c.name);
+  return missing.length?`${missing.length} carta(s) sem MV na regra de ${r.first}`:null;
+ }).filter(Boolean);
+ if(incomplete.length)warnings.push('Cobertura incompleta de custos: '+incomplete.join('; ')+'.');
+ $('ruleWarnings').textContent=warnings.join(' ');
+}
+function addRule(first,second='',min=1,max=7){
+ const cats=currentParsed?.cats||[];
+ if(cats.length===0){$('ruleWarnings').textContent='Importe ou categorize cartas antes de criar regras.';return;}
+ const f=first||cats[0].key;
+ rules.push({id:++ruleCounter,first:key(f),second:key(second),min,max,mvMin:'',mvMax:''});renderRules();
+}
+function updateDeck(){currentParsed=parseDeck();describeDeck(currentParsed);updateManaSummary();renderRules();}
+$('categoryRules').addEventListener('input',e=>{
+ const target=e.target,row=target.closest('[data-rule]');if(!row||!target.dataset.field)return;
+ const rule=rules.find(r=>r.id===Number(row.dataset.rule));if(!rule)return;
+ const f=target.dataset.field;rule[f]=f==='min'||f==='max'?Number(target.value):target.value;
+ warnRules();
+});
+$('categoryRules').addEventListener('change',e=>{
+ const target=e.target,row=target.closest('[data-rule]');if(!row||!target.dataset.field)return;
+ const rule=rules.find(r=>r.id===Number(row.dataset.rule));if(!rule)return;
+ const f=target.dataset.field;rule[f]=f==='min'||f==='max'?Number(target.value):target.value;
+ warnRules();
+});
+$('categoryRules').addEventListener('click',e=>{const btn=e.target.closest('[data-remove]');if(!btn)return;rules=rules.filter(r=>r.id!==Number(btn.dataset.remove));renderRules();});
+$('addRule').addEventListener('click',()=>addRule());
+$('presetBalanced').addEventListener('click',()=>{
+ const cs=currentParsed?.cats||[];const r=cs.find(c=>c.key==='ramp')||cs[0];
+ if(!r)return;
+ const draw=cs.find(c=>c.key==='draw');rules=[];addRule(r.key,draw&&draw.key!==r.key?draw.key:'',1,7);
+});
+$('clearRules').addEventListener('click',()=>{rules=[];renderRules();});
+function settings(){
+ let n=Number($('runs').value),minL=Number($('minL').value),maxL=Number($('maxL').value);
+ if(!Number.isInteger(n)||n<100||n>200000)throw Error('Defina um número inteiro entre 100 e 200.000 simulações.');
+ if(!Number.isInteger(minL)||!Number.isInteger(maxL)||minL<0||maxL>7||minL>maxL)throw Error('Configure uma faixa válida entre 0 e 7 terrenos.');
+ const active=rules.map((r,i)=>({...r}));
+ for(const [i,r] of active.entries()){
+  if(!r.first)throw Error(`Escolha uma categoria para a regra ${i+1}.`);
+  if(!Number.isInteger(r.min)||!Number.isInteger(r.max)||r.min<0||r.max>7||r.min>r.max)throw Error(`Mínimo e máximo inválidos na regra ${i+1}.`);
+  if((r.mvMin!==''&&!Number.isFinite(Number(r.mvMin)))||(r.mvMax!==''&&!Number.isFinite(Number(r.mvMax)))||(r.mvMin!==''&&r.mvMax!==''&&Number(r.mvMin)>Number(r.mvMax)))throw Error(`Faixa de valor de mana inválida na regra ${i+1}.`);
+ }
+ return {N:n,minL,maxL,rules:active,redraw:$('mulligan').checked};
+}
+function ruleLabel(rule){
+ const cats=currentParsed?.cats||[];
+ const name=k=>cats.find(c=>c.key===k)?.label||k;
+ const label=name(rule.first)+(rule.second?' OU '+name(rule.second):'');
+ const mv=(rule.mvMin!==''||rule.mvMax!=='')?` · MV ${rule.mvMin===''?'0':rule.mvMin}–${rule.mvMax===''?'∞':rule.mvMax}`:'';
+ return `${label} (${rule.min}–${rule.max})${mv}`;
+}
+async function runSimulation(){
+ const parsed=parseDeck();currentParsed=parsed;describeDeck(parsed);lastParsed=parsed;
+ let cfg;try{cfg=settings();}catch(e){alert(e.message);return;}
+ const size=parsed.library.reduce((s,c)=>s+c.qty,0);
+ if(size<13){alert('Cole um deck com pelo menos 13 cartas na biblioteca, fora do comandante.');return;}
+ const library=parsed.library.flatMap(c=>Array(c.qty).fill(c));
+ const token=++simToken;
+ $('simulate').disabled=true;$('cancelRun').hidden=false;$('simProgress').hidden=false;$('simProgress').textContent='Simulando… 0%';
+ $('export').disabled=true;
+ const rng=prng(Number($('seed').value)||20261025),dist=Array(8).fill(0),colorSeen={W:0,U:0,B:0,R:0,G:0};
+ let initialKeep=0,finalKeep=0,mulligans=0,hasRamp=0,turn4=0,turn6=0,lastHand=[];
+ let landFail=0,ruleFail=cfg.rules.map(()=>0),anyCat=cfg.rules.map(()=>0),rejectOnlyLand=0;
+ const chunkSize=800;
+ for(let from=0;from<cfg.N;from+=chunkSize){
+  if(token!==simToken)return;
+  for(let i=from;i<Math.min(cfg.N,from+chunkSize);i++){
+   let d=shuffle(library,rng),hand=d.slice(0,7),test=eligible(hand,cfg);
+   if(test.pass)initialKeep++;
+   else{
+    if(!test.landPass)landFail++;
+    cfg.rules.forEach((r,j)=>{if(!test.rulePass[j])ruleFail[j]++;});
+    if(test.landPass===false&&test.rulePass.every(Boolean))rejectOnlyLand++;
+   }
+   if(!test.pass&&cfg.redraw){mulligans++;d=shuffle(library,rng);hand=d.slice(0,7);test=eligible(hand,cfg);}
+   if(test.pass)finalKeep++;
+   dist[test.lands]++;
+   if(hand.some(c=>c.ramp))hasRamp++;
+   cfg.rules.forEach((r,j)=>{if(test.ruleCounts[j]>=r.min&&test.ruleCounts[j]<=r.max)anyCat[j]++;});
+   const colors=new Set(hand.filter(c=>c.land).flatMap(c=>c.colors.split('')));
+   for(const c of all)if(colors.has(c))colorSeen[c]++;
+   if(d.slice(0,11).filter(c=>c.land).length>=4)turn4++;
+   if(d.slice(0,13).filter(c=>c.land).length>=6)turn6++;
+   if(i===cfg.N-1)lastHand=hand;
+  }
+  $('simProgress').textContent=`Simulando… ${fmt(Math.min(cfg.N,from+chunkSize))} / ${fmt(cfg.N)} (${Math.round(100*Math.min(cfg.N,from+chunkSize)/cfg.N)}%)`;
+  if(from+chunkSize<cfg.N)await new Promise(res=>setTimeout(res,0));
+ }
+ if(token!==simToken)return;
+ lastResults={...cfg,dist,initialKeep,finalKeep,mulligans,hasRamp,turn4,turn6,colorSeen,landCount:parsed.landCount,total:parsed.n,landFail,ruleFail,anyCat,lastHand};
+ renderResults(lastResults,parsed,library);
+ $('simProgress').textContent=`Simulação concluída: ${fmt(cfg.N)} mãos.`;
+ $('simulate').disabled=false;$('cancelRun').hidden=true;$('export').disabled=false;
+}
+function renderResults(x,parsed,library){
+ const maxBar=Math.max(20,100*Math.max(...x.dist)/x.N);
+ const charts=x.dist.map((n,i)=>bar(i+' terrenos',n,x.N,maxBar)).join('');
+ const colors=all.map(c=>`<div class="colorrow"><span class="dot">${c}</span><div class="progress"><div style="width:${100*x.colorSeen[c]/x.N}%"></div></div><span class="small" style="text-align:right">${pct(x.colorSeen[c],x.N)}</span></div>`).join('');
+ const critText=`${x.minL}–${x.maxL} terrenos${x.rules.length?' + '+x.rules.map(ruleLabel).join(' + '):''}`;
+ const failures=`<div class="failureRow"><span>Faixa de terrenos</span><strong>${pct(x.landFail,x.N)}</strong></div>${x.rules.map((r,i)=>`<div class="failureRow"><span>${escapeHtml(ruleLabel(r))}</span><strong>${pct(x.ruleFail[i],x.N)}</strong></div>`).join('')}`;
+ $('content').innerHTML=`<div class="statgrid">${stat(fmt(x.N),'Mãos simuladas')}${stat(pct(x.initialKeep,x.N),'Keep na primeira mão')}${stat(pct(x.finalKeep,x.N),'Keep após política de mulligan')}</div>
+ <p class="small"><strong style="color:var(--fg)">Condição:</strong> ${escapeHtml(critText)}</p>
+ <h3>Distribuição de terrenos ${x.redraw?'(após possível mulligan)':'(mão inicial)'}</h3>${charts}
+ <div class="resultDivider"><h3>Por que as mãos iniciais falham?</h3><div class="ruleBreakdown">${failures}</div>
+ <p class="small" style="margin-top:7px">As razões podem ocorrer juntas. Cada taxa usa todas as primeiras mãos, não apenas as rejeitadas.</p></div>
+ <div class="resultDivider grid2"><div><h3>Outras métricas</h3><div class="twoline">${stat(pct(x.hasRamp,x.N),'≥1 tag Ramp na mão final')}${stat(pct(x.turn4,x.N),'≥4 terrenos vistos até T4')}${stat(pct(x.turn6,x.N),'≥6 terrenos vistos até T6')}${stat(x.mulligans?fmt(x.mulligans):'0','Mulligans gratuitos usados')}</div></div><div><h3>Cores potenciais nos terrenos da mão</h3>${colors}<p class="small">Não considera custos, entrada virada ou restrições de mana.</p></div></div>
+ <div class="resultDivider"><div class="flex" style="justify-content:space-between"><h3>Mão de exemplo</h3><button class="ghost mini" id="newHand" type="button">Distribuir outra</button></div><div class="sampleHand" id="sample">${handCards(x.lastHand)}</div><p class="small" id="handVerdict" style="margin-top:8px">${describeHand(x.lastHand,x)}</p></div>
+ ${parsed.n!==100||parsed.cmdCount!==1?`<p class="small" style="color:var(--gold)">Atenção: ${parsed.n} cartas e ${parsed.cmdCount} comandante(s). Confira a legalidade antes de comparar versões.</p>`:''}
+ <p class="small" style="margin-top:16px">A mesma semente reproduz os resultados. Os percentuais refletem apenas categorias e custos cadastrados. Não simulam a conjurabilidade real, os custos coloridos nem a sequência de jogadas.</p>`;
+ $('placeholder').hidden=true;$('content').hidden=false;
+ $('newHand').addEventListener('click',()=>{const hand=shuffle(library,Math.random).slice(0,7);$('sample').innerHTML=handCards(hand);$('handVerdict').textContent=describeHand(hand,x);});
+}
+function describeHand(hand,x){const t=eligible(hand,x);let failures=[];if(!t.landPass)failures.push(`${t.lands} terrenos`);
+ x.rules.forEach((r,i)=>{if(!t.rulePass[i])failures.push(`${ruleLabel(r)}: ${t.ruleCounts[i]}`);});
+ return t.pass?'KEEP de acordo com seus critérios.':'MULLIGAN: '+failures.join('; ')+'.';}
+function handCards(hand){return hand.map(c=>`<div class="sampleCard ${c.land?'land':''}">${escapeHtml(c.name)}<small>${c.land?'Terreno':c.categories.length?escapeHtml(c.categories.join(' · ')+(c.manaValue!==null?' · MV '+c.manaValue:'')):(c.manaValue!==null?'MV '+c.manaValue:'Sem categoria')}</small></div>`).join('');}
+function exportStats(){
+ if(!lastResults)return;const x=lastResults;
+ const rows=[['Métrica','Valor'],['Simulações',x.N],['Cartas do deck',x.total],['Terrenos',x.landCount],['Critério de terrenos',`${x.minL} a ${x.maxL}`],['Mulligan gratuito',x.redraw?'Sim':'Não'],['Keep na primeira mão',pct(x.initialKeep,x.N)],['Keep após política de mulligan',pct(x.finalKeep,x.N)],['Mulligans utilizados',x.mulligans],['Falha na faixa de terrenos',pct(x.landFail,x.N)],...x.rules.flatMap((r,i)=>[[`Regra ${i+1}`,ruleLabel(r)],[`Falha regra ${i+1}`,pct(x.ruleFail[i],x.N)]]),['≥1 tag Ramp na mão final',pct(x.hasRamp,x.N)],['4 terrenos vistos até turno 4',pct(x.turn4,x.N)],['6 terrenos vistos até turno 6',pct(x.turn6,x.N)],...x.dist.map((n,i)=>[i+' terrenos na mão final',pct(n,x.N)]),...all.map(c=>['Fonte potencial '+c,pct(x.colorSeen[c],x.N)])];
+ const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='opening-lab-v03-estatisticas.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('deckInput').value=defaultDeck;
+$('loadDefault').addEventListener('click',()=>{$('deckInput').value=defaultDeck;$('extras').value='';updateDeck();});
+$('deckInput').addEventListener('input',updateDeck);$('extras').addEventListener('input',updateDeck);$('manaValues').addEventListener('input',updateDeck);
+$('loadSampleMana').addEventListener('click',()=>{$('manaValues').value=RAMOS_MANA_SAMPLE;updateDeck();});$('clearMana').addEventListener('click',()=>{$('manaValues').value='';updateDeck();});
+$('simulate').addEventListener('click',runSimulation);$('export').addEventListener('click',exportStats);
+$('cancelRun').addEventListener('click',()=>{simToken++;$('simulate').disabled=false;$('cancelRun').hidden=true;$('simProgress').textContent='Simulação cancelada.';});
+$('fileInput').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;$('deckInput').value=await f.text();updateDeck();});
+updateDeck();
+
+</script></body></html>
