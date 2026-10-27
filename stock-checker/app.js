@@ -102,7 +102,7 @@ function printOfferRow(o,group){
 function renderOffers(){
  const rows=selected(),groups=groupsFor(rows),allOffers=uniqueOffers(rows);
  $("resultCount").textContent=formatInt(groups.length)+" cartas / "+formatInt(allOffers.length)+" ofertas";
- if(!groups.length){$("offerResults").innerHTML='<p class="empty">Nenhuma carta corresponde aos filtros.</p>';return;}
+ if(!groups.length){$("offerResults").innerHTML='<p class="empty">'+(data.offers.length?"Nenhuma carta corresponde aos filtros.":"Nenhuma oferta verificada nesta captura. Consulte as abas Pendências e Diagnóstico.")+'</p>';return;}
  $("offerResults").innerHTML=groups.map(g=>{
   const p=g.cheapest||{};
   const shops=new Set(g.offers.map(o=>o.store)).size;
@@ -173,11 +173,10 @@ async function importFiles(fileList){
  try{
   const files=await K.readFiles(fileList);
   if(!files["oportunidades_es.csv"])throw new Error("Selecione oportunidades_es.csv; ele é obrigatório.");
-  if(!files["oportunidades_es.csv"].length)throw new Error("O arquivo de oportunidades não contém linhas.");
   const first=files["oportunidades_es.csv"][0];
-  if(!["carta","preco_loja","loja"].every(k=>Object.hasOwn(first,k)))throw new Error("CSV incompatível: faltam as colunas carta, preco_loja ou loja. Confira se escolheu a exportação do Stock Checker.");
+  if(first&&!["carta","preco_loja","loja"].every(k=>Object.hasOwn(first,k)))throw new Error("CSV incompatível: faltam as colunas carta, preco_loja ou loja. Confira se escolheu a exportação do Stock Checker.");
   const offers=files["oportunidades_es.csv"].map(parseOffer).filter(x=>x.name&&x.store&&x.price!==null);
-  if(!offers.length)throw new Error("Nenhuma oferta com carta, loja e preço válido.");
+  if(!offers.length&&files["oportunidades_es.csv"].length)throw new Error("Nenhuma oferta com carta, loja e preço válido.");
   const diag=files["diagnostics.json"]||null;
   if(diag&&diag.schema!=="mtg-stock-checker/v3")throw new Error("diagnostics.json incompatível com Stock Checker V3.");
   data={raw:files["oportunidades_es.csv"],offers,stores:files["resumo_lojas.csv"]||[],pending:files["pendencias.csv"]||[],diagnostics:diag};
