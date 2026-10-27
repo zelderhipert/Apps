@@ -74,7 +74,7 @@ function kpis(){
  const restored=new Set(data.offers.filter(o=>o.historicalReference).map(o=>K.norm(o.name))).size;
  const refStatus=$("referenceStatus");
  refStatus.classList.toggle("warn",missing>0||restored>0);
- const provenance=restored?" ATENÇÃO: "+formatInt(restored)+" cartas utilizam referências HISTÓRICAS da captura anterior, sem nova verificação na LigaMagic.":"";
+ const provenance=restored?" ATENÇÃO: "+formatInt(restored)+" "+(restored===1?"carta utiliza":"cartas utilizam")+" referências HISTÓRICAS da captura anterior, sem nova verificação na LigaMagic.":"";
  refStatus.textContent=(missing>0?`Atenção: ${formatInt(missing)} de ${formatInt(cards)} cartas com ofertas estão sem menor preço da Liga no CSV importado. Verifique o deck.json e os nomes da captura.`:`Referências da Liga reconhecidas para ${formatInt(covered.size)} de ${formatInt(cards)} cartas com ofertas.`)+provenance;
  const stores=[...new Set(offers.map(o=>o.store))].length;
  const tracked=Number.isFinite(+diag.requested_cards)?+diag.requested_cards:cards+(data.pending.length||0);
