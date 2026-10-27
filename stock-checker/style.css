@@ -4,3 +4,5 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 [hidden]{display:none!important}
 @media(max-width:950px){.filters{grid-template-columns:repeat(2,1fr)}.statgrid{grid-template-columns:repeat(2,1fr)}.heroGlyph{font-size:90px}.shell{padding:0 20px}}
 @media(max-width:640px){.topbar{height:70px}.brand small{display:none}.hero{padding:35px 0 28px}.heroGlyph{display:none}.import-card{padding:19px;gap:13px}.importIcon{width:43px;height:43px;font-size:26px}.import-card h2{font-size:19px}.filters{grid-template-columns:1fr}.statgrid{gap:8px}.stat{padding:13px}.stat b{font-size:26px}.offerGroup>summary{grid-template-columns:1.8fr 1fr 20px;gap:8px;padding:13px}.offerGroup .summaryDelta{display:none}.offerDetails{overflow-x:auto}.offerTable{min-width:800px}.storeGrid{grid-template-columns:1fr}.rightTools{flex-wrap:wrap}.localTag{font-size:10px}.subtlelink{display:none}}
+
+.referenceNotice{margin-top:13px;padding:11px 14px;border:1px solid #35625e;border-radius:10px;background:#12312f;color:#c2eadf;font-size:12px}.referenceNotice.warn{border-color:#72583b;background:#332819;color:#f2d6a5}

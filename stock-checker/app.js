@@ -68,6 +68,11 @@ function kpis(){
  const diag=data.diagnostics||{};
  const offers=uniqueOffers(data.offers);
  const cards=uniqueCards(data.offers);
+ const covered=new Set(data.offers.filter(o=>o.reference!==null&&o.reference>0).map(o=>K.norm(o.name)));
+ const missing=cards-covered.size;
+ const refStatus=$("referenceStatus");
+ refStatus.classList.toggle("warn",missing>0);
+ refStatus.textContent=missing>0?`Atenção: ${formatInt(missing)} de ${formatInt(cards)} cartas com ofertas estão sem menor preço da Liga no CSV importado. O dashboard não consegue calcular diferenças dessas cartas sem a referência. Verifique o deck.json e as colunas menor_preco_liga/diferenca_pct.`:`Referências da Liga reconhecidas para ${formatInt(covered.size)} de ${formatInt(cards)} cartas com ofertas.`;
  const stores=[...new Set(offers.map(o=>o.store))].length;
  const tracked=Number.isFinite(+diag.requested_cards)?+diag.requested_cards:cards+(data.pending.length||0);
  const confirmed=Number.isFinite(+diag.cards_with_offers)?+diag.cards_with_offers:cards;
@@ -109,7 +114,7 @@ function renderOffers(){
   return '<details class="offerGroup"><summary>'+
    '<div><span class="cardName">'+h(g.name)+'</span><span class="cardMeta">'+formatInt(g.offers.length)+' ofertas · '+formatInt(shops)+' lojas · '+printTags(g.items,"origin")+'</span></div>'+
    '<div><span class="offerLabel">MELHOR OFERTA</span><span class="offerPrice">'+amount(p.price)+'</span></div>'+
-   '<div class="summaryDelta"><span class="offerLabel">DIFERENÇA %</span><span class="marker '+pctColor(p.diff)+'">'+K.formatPct(p.diff)+'</span></div>'+
+   '<div class="summaryDelta"><span class="offerLabel">DIFERENÇA %</span><span class="marker '+pctColor(p.diff)+'">'+(Number.isFinite(p.diff)?K.formatPct(p.diff):"Sem referência") +'</span></div>'+
    '<div class="chevron">›</div></summary>'+
    '<div class="offerDetails"><div class="tableScroll"><table class="offerTable"><thead><tr><th>Loja / deck</th><th>Preço</th><th>Dif. R$</th><th>Dif. %</th><th>Versão / idioma / estado</th><th>Estoque</th><th>Consulta</th></tr></thead><tbody>'+
    g.offers.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity)).map(o=>printOfferRow(o,g.items)).join("")+
@@ -183,6 +188,7 @@ async function importFiles(fileList){
   setOptions();state={search:"",store:"",origin:"",sort:"name"};
   $("searchInput").value="";$("storeFilter").value="";$("originFilter").value="";$("sortFilter").value="name";
   $("dashboard").hidden=false;$("importSection").classList.add("compact");
+  status.style.color="";
   status.textContent="Dados carregados localmente: "+offers.length+" linhas, "+Object.keys(files).length+" arquivos reconhecidos. Nenhum upload foi feito.";
   setTab("offers");render();
  }catch(err){status.textContent="Não foi possível abrir: "+err.message;status.style.color="#ff9a9a";}

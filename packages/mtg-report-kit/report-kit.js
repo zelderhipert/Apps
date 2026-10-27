@@ -42,9 +42,13 @@ function uniqueBy(rows,keyFn){const keys=new Set();return rows.filter(r=>{const 
 function readFiles(files){
   const out={};
   const selected=Array.from(files||[]).filter(f=>!f.name.startsWith("."));
+  const supported=new Set(["oportunidades_es.csv","resumo_lojas.csv","pendencias.csv","diagnostics.json"]);
+  const duplicates=new Set(),seen=new Set();
+  for(const f of selected){const name=f.name.toLowerCase();if(!supported.has(name))continue;if(seen.has(name))duplicates.add(name);seen.add(name);}
+  if(duplicates.size)throw new Error("Há arquivos de relatórios duplicados na seleção: "+[...duplicates].join(", ")+". Selecione apenas uma pasta latest.");
   return Promise.all(selected.map(async f=>{
     const name=f.name.toLowerCase();
-    if(!["oportunidades_es.csv","resumo_lojas.csv","pendencias.csv","diagnostics.json"].includes(name))return;
+    if(!supported.has(name))return;
     if(f.size>10*1024*1024)throw new Error("Arquivo acima de 10 MB: "+f.name);
     const txt=await f.text();
     out[name]=name.endsWith(".json")?JSON.parse(txt):parseCSV(txt);
