@@ -26,7 +26,8 @@ function parseOffer(r){
    diff:diff??(price!==null&&reference>0?(price/reference-1)*100:null),
    stock:K.numberBR(r.estoque),edition:r.edicao||"Não informada",
    language:r.idioma||"—",foil:r.foil||"—",condition:r.conservacao||"—",
-   link:K.safeURL(r.link_oferta),checked:r.consultado_em||""
+   link:K.safeURL(r.link_oferta),checked:r.consultado_em||"",
+   historicalReference:/referencia historica|referência histórica/i.test(r.base_comparacao||"")
  };
 }
 function offerKey(o){return [K.norm(o.name),K.norm(o.store),o.price,o.edition,o.language,o.foil,o.condition,o.stock].join("~~");}
@@ -70,9 +71,11 @@ function kpis(){
  const cards=uniqueCards(data.offers);
  const covered=new Set(data.offers.filter(o=>o.reference!==null&&o.reference>0).map(o=>K.norm(o.name)));
  const missing=cards-covered.size;
+ const restored=new Set(data.offers.filter(o=>o.historicalReference).map(o=>K.norm(o.name))).size;
  const refStatus=$("referenceStatus");
- refStatus.classList.toggle("warn",missing>0);
- refStatus.textContent=missing>0?`Atenção: ${formatInt(missing)} de ${formatInt(cards)} cartas com ofertas estão sem menor preço da Liga no CSV importado. O dashboard não consegue calcular diferenças dessas cartas sem a referência. Verifique o deck.json e as colunas menor_preco_liga/diferenca_pct.`:`Referências da Liga reconhecidas para ${formatInt(covered.size)} de ${formatInt(cards)} cartas com ofertas.`;
+ refStatus.classList.toggle("warn",missing>0||restored>0);
+ const provenance=restored?" ATENÇÃO: "+formatInt(restored)+" cartas utilizam referências HISTÓRICAS da captura anterior, sem nova verificação na LigaMagic.":"";
+ refStatus.textContent=(missing>0?`Atenção: ${formatInt(missing)} de ${formatInt(cards)} cartas com ofertas estão sem menor preço da Liga no CSV importado. Verifique o deck.json e os nomes da captura.`:`Referências da Liga reconhecidas para ${formatInt(covered.size)} de ${formatInt(cards)} cartas com ofertas.`)+provenance;
  const stores=[...new Set(offers.map(o=>o.store))].length;
  const tracked=Number.isFinite(+diag.requested_cards)?+diag.requested_cards:cards+(data.pending.length||0);
  const confirmed=Number.isFinite(+diag.cards_with_offers)?+diag.cards_with_offers:cards;
@@ -96,7 +99,7 @@ function printOfferRow(o,group){
  const decks=[...new Set(associated.map(item=>item.deck).filter(Boolean))].sort().join(", ");
  return '<tr>'+
  '<td><b>'+h(o.store)+'</b><div class="cardMeta">'+h(decks)+'</div><div>'+origins+'</div></td>'+
- '<td><span class="money">'+amount(o.price)+'</span><div class="cardMeta">Liga: '+amount(o.reference)+'</div></td>'+
+ '<td><span class="money">'+amount(o.price)+'</span><div class="cardMeta">Liga'+(o.historicalReference?' (captura anterior)':'')+': '+amount(o.reference)+'</div></td>'+
  '<td><span class="'+pctColor(o.delta)+' money">'+signedMoney(o.delta)+'</span></td>'+
  '<td><span class="'+pctColor(o.diff)+' money">'+K.formatPct(o.diff)+'</span></td>'+
  '<td>'+h(o.edition)+'<div class="cardMeta">'+h(o.language)+' · '+h(o.foil)+' · '+h(o.condition)+'</div></td>'+
