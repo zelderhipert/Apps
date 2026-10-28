@@ -3,7 +3,12 @@
 "use strict";
 const prefix="mtgverse-art-v1:",day=86400000;
 const norm=s=>String(s||"").normalize("NFKC").trim().toLowerCase();
-const setCode=s=>/^[a-z0-9]{2,8}$/i.test(String(s||"").trim())?String(s).trim().toLowerCase():"";
+// LigaMagic uses historical short edition codes that differ from Scryfall.
+const ligaAliases={mi:"mrd",lw:"lrw",ex:"exo",sh:"sth",mt:"mor",wbmb2:"mb2",jpsoa:"sta"};
+const setCode=s=>{
+ const raw=String(s||"").trim().toLowerCase();
+ return /^[a-z0-9]{2,8}$/.test(raw)?(ligaAliases[raw]||raw):"";
+};
 const collectorCode=s=>/^[a-z0-9*\-★]{1,24}$/i.test(String(s||"").trim())?String(s).trim():"";
 function validImage(raw){try{const u=new URL(raw);return u.protocol==="https:"&&(u.hostname==="scryfall.io"||u.hostname.endsWith(".scryfall.io"))?u.href:null;}catch{return null;}}
 function imageFaces(card){
