@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b1017">
 <title>Stock Checker | MTGverse</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261028a">
 </head><body>
 <div class="shell">
   <header class="topbar">
@@ -14,7 +14,7 @@
     <div class="hero"><div><div class="eyebrow">MARKET INTELLIGENCE / COMMANDER</div><h1>Suas cartas.<br><em>Suas oportunidades.</em></h1><p>Ofertas reais das cinco lojas monitoradas, cruzadas com a Want e Maybeboard dos seus decks.</p></div><div class="heroGlyph" aria-hidden="true">✦</div></div>
     <section id="importSection" class="import-card" aria-labelledby="importHeading">
       <div class="importIcon">↥</div>
-      <div class="importBody"><h2 id="importHeading">Carregar um relatório local</h2><p>Abra a pasta <code>MTGverse/outputs/stock-checker/latest</code> ou selecione os arquivos gerados pela skill. Nada é enviado para a internet.</p>
+      <div class="importBody"><h2 id="importHeading">Carregar um relatório local</h2><p>Abra a pasta <code>MTGverse/outputs/stock-checker/latest</code> ou selecione os arquivos gerados pela skill. Os relatórios ficam locais; imagens consultam somente o nome e a edição no Scryfall.</p>
       <div class="actions"><label class="primary" for="folderInput">Abrir pasta de resultados</label><label class="secondary" for="filesInput">Selecionar arquivos</label>
       <input id="folderInput" type="file" webkitdirectory multiple hidden><input id="filesInput" type="file" accept=".csv,.json" multiple hidden></div>
       <p id="importStatus" class="subnote" role="status">Arquivos reconhecidos: oportunidades_es.csv, resumo_lojas.csv, pendencias.csv e diagnostics.json.</p></div>
@@ -38,6 +38,7 @@
         </div>
         <div class="listHead"><div><strong id="resultCount"></strong><span class="muted"> Clique numa carta para comparar as ofertas</span></div><button id="exportBtn" class="smallBtn">Exportar filtro CSV ↓</button></div>
         <div id="offerResults" class="offerResults"></div>
+        <p class="footnote">Imagens de edição não garantem a variante da oferta sem número de colecionador. Nas pendências, as artes são ilustrativas.</p>
         <p class="footnote">O menor preço da Liga é uma <strong>referência nominal</strong>; pode corresponder a outra edição, idioma, acabamento ou conservação. Ausência de resultado não prova estoque zero.</p>
       </section>
       <section id="storesTab" class="tabpane" hidden><div id="storeResults"></div></section>
@@ -45,8 +46,16 @@
       <section id="diagnosticsTab" class="tabpane" hidden><div id="diagnosticsResults"></div></section>
     </section>
   </main>
-  <footer>MTGverse / Stock Checker · HTML estático · sem servidor · processamento local</footer>
+  <footer>MTGverse · relatórios locais · imagens via <a href="https://scryfall.com" target="_blank" rel="noopener noreferrer">Scryfall</a> · artes © Wizards of the Coast · não afiliado</footer>
 </div>
+<dialog id="artDialog" class="artDialog" aria-label="Imagem da carta">
+ <div class="artDialogTop"><div><h2 id="artTitle"></h2><p id="artQuality"></p></div><button id="artClose" type="button" class="smallBtn">Fechar ×</button></div>
+ <img id="artLarge" alt="Carta ampliada">
+ <p id="artMeta"></p>
+ <div class="artDialogBottom"><button id="artPrev" class="smallBtn" type="button" hidden>← Outra face</button><span id="artFaceLabel"></span><button id="artNext" class="smallBtn" type="button" hidden>Outra face →</button><a id="artSource" target="_blank" rel="noopener noreferrer">Abrir no Scryfall ↗</a></div>
+</dialog>
 <script src="../packages/mtg-report-kit/report-kit.js?v=20261027b"></script>
-<script src="app.js?v=20261027c"></script>
+<script src="../packages/mtg-report-kit/scryfall-images.js?v=20261028a"></script>
+<script src="app.js?v=20261028a"></script>
+<script src="art-ui.js?v=20261028a"></script>
 </body></html>
