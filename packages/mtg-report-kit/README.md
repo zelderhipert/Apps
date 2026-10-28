@@ -9,3 +9,13 @@ O kit **não contém dados pessoais nem lógica da LigaMagic**. Cada app impleme
 Dados locais: `~/MTGverse/outputs/<nome-da-skill>/latest`. Apps pedem permissão via seletor de arquivos/pasta no navegador; não há acesso silencioso ao disco.
 
 Teste: `node --test test/report-kit.test.cjs`.
+
+## Imagens de cartas (Scryfall)
+
+Importe `scryfall-images.js` após `report-kit.js` e utilize `window.MTGCardImages.createResolver()`. O método `resolve({name, set, collector})` retorna um objeto contendo `kind` (`exact`, `edition`, `illustrative`), `faces`, `image`, `artist`, `page` e dados da impressão, ou `null` se não houver imagem.
+
+Não afirme impressão exata apenas com o código de edição: diferentes números de colecionador e variantes de arte podem compartilhar o set. O módulo traduz certas siglas antigas da LigaMagic para códigos Scryfall (por exemplo `MI` → `MRD`). Os demais códigos são enviados sem alteração; se não corresponderem, a visualização recua para uma imagem ilustrativa.
+
+O cache guarda **apenas URLs públicas e dados de impressão** no navegador, sem preços, decks ou estoque. Os requests são espaçados e disparados apenas para imagens visíveis. `stock-checker/art-ui.js` demonstra integração visual desacoplada e modal de cartas com duas faces.
+
+Teste automatizado: `node --test test/scryfall-images.test.cjs`.

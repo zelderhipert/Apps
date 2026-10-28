@@ -25,3 +25,18 @@ O menor preço da Liga é **referência nominal**, potencialmente outra impress�
 O parser CSV e utilitários compartilhados ficam em `../packages/mtg-report-kit/report-kit.js`, sem dependências externas. A lógica específica está em `app.js`. Para testar parser: `node --test ../packages/mtg-report-kit/test/report-kit.test.cjs`.
 
 A aplicação é read-only e não grava nada na LigaMagic.
+
+## Artes das cartas — Scryfall
+
+O dashboard inclui miniaturas na linha da carta, em cada oferta de loja e nas pendências. Clique em qualquer miniatura para ampliar a carta inteira, inclusive frente/verso quando a API trouxer as duas faces. Os direitos/assinaturas dos artistas e copyright na própria imagem são preservados.
+
+- Oferta com **edição + número de colecionador** identificados no Scryfall: indicador **Impressão identificada**.
+- Oferta com apenas **sigla da edição** (caso mais comum na V3): imagem de **uma impressão daquela edição**, sem garantia de corresponder à variante de arte, idioma ou acabamento efetivamente ofertados.
+- Código de edição desconhecido, carta indisponível na edição ou pendência sem oferta: **Imagem ilustrativa**, usando qualquer impressão retornada pelo Scryfall.
+- Imagens ausentes ou API indisponível: o quadro da imagem permanece com indicador neutro; **as ofertas e preços continuam funcionando**.
+
+A camada `packages/mtg-report-kit/scryfall-images.js` faz lookup gradual (máximo aproximado de 3 solicitações por segundo, cache em memória e `localStorage` só de metadados das imagens por até 7 dias). O usuário não precisa executar a skill outra vez para ver as imagens no CSV existente.
+
+**Privacidade:** não existe upload dos relatórios para Scryfall ou GitHub. Quando as imagens aparecem na tela, o navegador envia ao Scryfall apenas o nome da carta e, quando houver, sigla da edição/número de colecionador. As imagens dependem de conexão com a internet; os dados do stock-check permanecem utilizáveis offline.
+
+**Créditos e direitos:** imagens obtidas via Scryfall. A arte das cartas pertence à Wizards of the Coast e/ou respectivos titulares. Projeto não oficial e não endossado. Utilizamos a carta completa em vez de `art_crop`, preservando os créditos na moldura.
