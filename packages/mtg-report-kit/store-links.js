@@ -9,6 +9,8 @@
 const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," ");
 const STORES={
  "taberna geek":{id:"41369",host:"www.tabernageek.com.br",verifiedHost:true},
+ "magos":{id:"621302",host:"www.ligamagic.com.br",verifiedHost:false},
+ "magos da costa":{id:"621302",host:"www.ligamagic.com.br",verifiedHost:false},
  "vila geek":{id:"49834",host:"www.ligamagic.com.br",verifiedHost:false},
  "vila geek vila velha":{id:"49834",host:"www.ligamagic.com.br",verifiedHost:false},
  "black game house":{id:"611044",host:"www.ligamagic.com.br",verifiedHost:false},
