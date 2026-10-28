@@ -41,17 +41,22 @@ A camada `packages/mtg-report-kit/scryfall-images.js` faz lookup gradual (máxim
 
 **Créditos e direitos:** imagens obtidas via Scryfall. A arte das cartas pertence à Wizards of the Coast e/ou respectivos titulares. Projeto não oficial e não endossado. Utilizamos a carta completa em vez de `art_crop`, preservando os créditos na moldura.
 
-## Consultar o estoque da loja
+## Consultas da carta nas cinco lojas e na LigaMagic
 
-Cada link por oferta passa a buscar **o nome da carta no catálogo da loja**, não um SKU/impressão individual. Seguimos a taxonomia `?view=ecom/itens&page=1&id=<ID>&busca=<carta>&txt_estoque=1...` fornecida no exemplo da Taberna Geek.
+A interface mostra **Buscar na loja**, abrindo uma busca nominal no site próprio da loja, e **Carta na Liga**, abrindo a página individual da carta na LigaMagic (`view=cards/card&card=...`). Nenhum desses links abre a Compra por Lista ou adiciona itens ao carrinho. A URL específica da carta foi confirmada em exemplos públicos, mas a navegação real ainda depende do site.
 
-O módulo `../packages/mtg-report-kit/store-links.js` codifica o nome e usa os IDs de loja conhecidos. A Taberna usa o domínio `www.tabernageek.com.br` informado pelo usuário. Vila Geek, Black Game House e Fênix usam provisoriamente a rota do domínio `www.ligamagic.com.br` com o respectivo ID, pois os domínios customizados e o comportamento dessas buscas ainda não foram confirmados em navegação real. Magos agora usa o ID **621302**, confirmado pelo `shopping.json` de 27/10/2026; mesmo CSVs históricos sem `loja_id` podem abrir sua busca. O domínio customizado ainda não está confirmado, portanto o link usa a rota LigaMagic.
+Domínios e IDs informados/validados:
 
-O campo anterior `link_oferta` é mantido como fallback (consulta geral) e a skill acrescenta `loja_id` aos novos CSVs. Os relatórios históricos continuam compatíveis.
+| Loja | Domínio próprio | ID |
+|---|---|---|
+| Magos | `www.magosdacosta.com.br` | 621302 |
+| Taberna | `www.tabernageek.com.br` | 41369 |
+| Vila Geek | `www.vilageekgames.com.br` | 49834 |
+| Black Game House | `www.blackgamehouse.com.br` | 611044 |
+| Fênix Geek House | `www.fenixhousetcg.com.br` | 45754 |
 
+A busca de estoque preserva os parâmetros fornecidos pelo usuário: `?view=ecom/itens&page=1&id=<ID>&comdesconto=&busca=<carta>&txt_filtro_multiestoque=&txt_order=1&txt_limit=30&txt_estoque=1&btFiltrar=Filtrar`. Todos os valores são codificados com `URLSearchParams`.
 
-## Lojas com domínio próprio e página de carta na LigaMagic
+O campo `link_oferta` do CSV continua guardando a URL original da captura da Compra por Lista exclusivamente para rastreabilidade; **não é mostrado ao usuário como destino de compra**. Para executar o dashboard com CSVs antigos, o HTML cria as URLs com o nome da carta e da loja mesmo quando `loja_id` estiver ausente.
 
-Os cinco domínios foram informados pelo usuário: Taberna Geek (`www.tabernageek.com.br`), Vila Geek (`www.vilageekgames.com.br`), Black Game House (`www.blackgamehouse.com.br`), Fênix Geek House (`www.fenixhousetcg.com.br`) e Magos (`www.magosdacosta.com.br`). O código `store-links.js` usa a mesma taxonomia `?view=ecom/itens&page=1&id=...&busca=...` em todos, incluindo o ID confirmado da Magos (`621302`).
-
-O relatório HTML oferece **Buscar na loja** (página da carta filtrada no catálogo da loja) e **Carta na Liga** (`https://www.ligamagic.com.br/?view=cards/card&card=<nome inglês codificado>`). O segundo é uma página de carta, não `view=cards/lista` nem um carrinho. `link_oferta` continua no CSV por rastreabilidade da captura original, mas não precisa ser exibido como link de compra. A URL não seleciona automaticamente a impressão específica.
+Esses links são **pesquisas nominais**, não identificam um exemplar ou a edição exata. Alguns sites podem bloquear acesso automatizado; confirmar funcionamento manual no navegador.

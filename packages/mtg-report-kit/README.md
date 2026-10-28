@@ -20,13 +20,13 @@ O cache guarda **apenas URLs públicas e dados de impressão** no navegador, sem
 
 Teste automatizado: `node --test test/scryfall-images.test.cjs`.
 
-## URLs de estoque por loja
+## URLs de estoque e carta individual
 
-`store-links.js` expõe `window.MTGStoreLinks.build({store,card,storeId})`, que devolve `{url,label,hostVerified,storeId}` ou `null` quando não há ID confiável. A função não usa rede e constrói links para buscas nominais de uma carta no e-commerce baseado na LigaMagic. Os IDs das quatro lojas conhecidas são checados antes de montar URLs; `URLSearchParams` cuida da codificação.
+`store-links.js` disponibiliza:
 
-Somente o domínio próprio da Taberna está confirmado pelo usuário. Para as outras lojas, a rota no domínio LigaMagic é provisória e requer teste. Não afirmar que uma busca identifica a impressão/versão específica de uma oferta.
+- `MTGStoreLinks.build({store,card,storeId})` — busca a carta no site próprio da loja, com domínio e ID dos cinco vendedores confirmados; retorna `{url,label,hostVerified,storeId}` ou `null` se não corresponder ao cadastro.
+- `MTGStoreLinks.cardPage(name)` — abre `https://www.ligamagic.com.br/?view=cards%2Fcard&card=...`, página de carta, não carrinho ou Compra por Lista.
 
+Magos `621302` / `www.magosdacosta.com.br`; Taberna `41369` / `www.tabernageek.com.br`; Vila Geek `49834` / `www.vilageekgames.com.br`; Black Game House `611044` / `www.blackgamehouse.com.br`; Fênix `45754` / `www.fenixhousetcg.com.br`. Os domínios próprios foram informados pelo usuário. A loja exata é validada para não fabricar links para IDs divergentes.
 
-## Domínios confirmados de lojas e carta individual na LigaMagic
-
-A versão atual de `store-links.js` usa os cinco domínios próprios fornecidos pelo usuário, com seus IDs da Compra por Lista. A função `cardPage("Culling the Weak")` produz `https://www.ligamagic.com.br/?view=cards%2Fcard&card=Culling+the+Weak`, uma página nominal de carta (não a Compra por Lista). O navegador monta links sem consultar API nem alterar carrinho. A rota da loja é busca por nome, não garante edição ou conservação específicas.
+As URLs são apenas buscas por nome, não itens de compra de impressão/condição específicas. O módulo não envia requisições, apenas gera links. Testes: `node --test test/store-links.test.cjs`.
