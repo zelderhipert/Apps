@@ -25,6 +25,7 @@ function parseOffer(r){
    price,reference,delta:delta??(price!==null&&reference!==null?price-reference:null),
    diff:diff??(price!==null&&reference>0?(price/reference-1)*100:null),
    stock:K.numberBR(r.estoque),edition:r.edicao||"Não informada",
+   collector:r.numero_colecao||r.collector_number||r.numero_colecionador||"",
    language:r.idioma||"—",foil:r.foil||"—",condition:r.conservacao||"—",
    link:K.safeURL(r.link_oferta),checked:r.consultado_em||"",
    historicalReference:/referencia historica|referência histórica/i.test(r.base_comparacao||"")
@@ -93,11 +94,19 @@ function kpis(){
 function printTags(arr,key){
  return [...new Set(arr.map(x=>x[key]).filter(Boolean))].sort().map(t=>'<span class="badge '+(t==="Want"?"wanted":t==="Maybeboard"?"maybe":"")+'">'+h(t)+'</span>').join(" ");
 }
+function artButton(name,edition="",collector="",kind="generic"){
+ if(!name)return "";
+ return '<button type="button" class="cardArt '+(kind==="offer"?"cardArtOffer":kind==="pending"?"cardArtPending":"cardArtSmall")+
+ '" data-art-name="'+h(name)+'" data-art-set="'+h(kind==="offer"?edition:"")+
+ '" data-art-collector="'+h(kind==="offer"?collector:"")+
+ '" aria-label="Ampliar imagem de '+h(name)+'"><span class="artPlaceholder" aria-hidden="true">✦</span></button>';
+}
 function printOfferRow(o,group){
  const associated=group.filter(item=>offerKey(item)===offerKey(o));
  const origins=printTags(associated,"origin");
  const decks=[...new Set(associated.map(item=>item.deck).filter(Boolean))].sort().join(", ");
  return '<tr>'+
+ '<td>'+artButton(o.name,o.edition,o.collector,"offer")+'</td>'+
  '<td><b>'+h(o.store)+'</b><div class="cardMeta">'+h(decks)+'</div><div>'+origins+'</div></td>'+
  '<td><span class="money">'+amount(o.price)+'</span><div class="cardMeta">Liga'+(o.historicalReference?' (captura anterior)':'')+': '+amount(o.reference)+'</div></td>'+
  '<td><span class="'+pctColor(o.delta)+' money">'+signedMoney(o.delta)+'</span></td>'+
@@ -115,11 +124,11 @@ function renderOffers(){
   const p=g.cheapest||{};
   const shops=new Set(g.offers.map(o=>o.store)).size;
   return '<details class="offerGroup"><summary>'+
-   '<div><span class="cardName">'+h(g.name)+'</span><span class="cardMeta">'+formatInt(g.offers.length)+' ofertas · '+formatInt(shops)+' lojas · '+printTags(g.items,"origin")+'</span></div>'+
+   '<div class="cardHeading">'+artButton(g.name)+'<div><span class="cardName">'+h(g.name)+'</span><span class="cardMeta">'+formatInt(g.offers.length)+' ofertas · '+formatInt(shops)+' lojas · '+printTags(g.items,"origin")+'</span></div></div>'+
    '<div><span class="offerLabel">MELHOR OFERTA</span><span class="offerPrice">'+amount(p.price)+'</span></div>'+
    '<div class="summaryDelta"><span class="offerLabel">DIFERENÇA %</span><span class="marker '+pctColor(p.diff)+'">'+(Number.isFinite(p.diff)?K.formatPct(p.diff):"Sem referência") +'</span></div>'+
    '<div class="chevron">›</div></summary>'+
-   '<div class="offerDetails"><div class="tableScroll"><table class="offerTable"><thead><tr><th>Loja / deck</th><th>Preço</th><th>Dif. R$</th><th>Dif. %</th><th>Versão / idioma / estado</th><th>Estoque</th><th>Consulta</th></tr></thead><tbody>'+
+   '<div class="offerDetails"><div class="tableScroll"><table class="offerTable"><thead><tr><th>Arte</th><th>Loja / deck</th><th>Preço</th><th>Dif. R$</th><th>Dif. %</th><th>Versão / idioma / estado</th><th>Estoque</th><th>Consulta</th></tr></thead><tbody>'+
    g.offers.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity)).map(o=>printOfferRow(o,g.items)).join("")+
    '</tbody></table></div></div></details>';
  }).join("");
@@ -159,7 +168,7 @@ function renderStores(){
 }
 function renderPending(){
  if(!data.pending.length){$("pendingResults").innerHTML='<div class="panel"><p class="empty">Nenhuma pendência no arquivo importado.</p></div>';return;}
- $("pendingResults").innerHTML='<div class="panel">'+data.pending.map(r=>'<div class="pendingItem"><b>'+h(r.carta||"—")+'</b><span>'+h(r.observacao||r.status||"Não confirmado")+'</span></div>').join("")+'</div>';
+ $("pendingResults").innerHTML='<div class="panel">'+data.pending.map(r=>'<div class="pendingItem"><div class="pendingCardHead">'+artButton(r.carta||r.card_name||"","","","pending")+'<b>'+h(r.carta||r.card_name||"—")+'</b></div><span>'+h(r.observacao||r.status||"Não confirmado")+'</span></div>').join("")+'</div>';
 }
 function renderDiagnostics(){
  const d=data.diagnostics;
