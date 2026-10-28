@@ -57,7 +57,9 @@ function createResolver(options={}){
  function cached(k,call){
   const hit=fromStorage(k);if(hit!==undefined)return Promise.resolve(hit);
   if(memory.has(k))return memory.get(k);
-  const p=call().then(x=>{if(x!==undefined)toStorage(k,x);return x;}).finally(()=>memory.delete(k));
+  const p=call().then(x=>{if(x===undefined){memory.delete(k);return x;}
+   toStorage(k,x);if(memory.size>400)memory.delete(memory.keys().next().value);return x;
+  }).catch(err=>{memory.delete(k);throw err;});
   memory.set(k,p);return p;
  }
  async function named(name,set){
