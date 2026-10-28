@@ -107,9 +107,11 @@ function printOfferRow(o,group){
  const origins=printTags(associated,"origin");
  const decks=[...new Set(associated.map(item=>item.deck).filter(Boolean))].sort().join(", ");
  const searched=storeSearch?.build({store:o.store,card:o.name,storeId:o.storeId})||null;
- const target=searched?.url||o.link;
- const label=searched?.label||(o.link?"Consulta geral ↗":"—");
- const title=searched?(searched.hostVerified?"Busca por nome no catálogo da loja; não seleciona impressão específica.":"Rota de busca por loja na LigaMagic; endereço da loja não confirmado."):"Link da consulta geral; não identifica loja ou edição.";
+ const cardLink=storeSearch?.cardPage(o.name)||null;
+ const target=searched?.url||cardLink;
+ const label=searched?.label||(cardLink?"Carta na Liga ↗":"—");
+ const title=searched?"Busca por nome no estoque da loja; não seleciona impressão ou condição específica.":
+ "Página da carta na LigaMagic, sem abrir a Compra por Lista.";
  return '<tr>'+
  '<td>'+artButton(o.name,o.edition,o.collector,"offer")+'</td>'+
  '<td><b>'+h(o.store)+'</b><div class="cardMeta">'+h(decks)+'</div><div>'+origins+'</div></td>'+
@@ -119,7 +121,7 @@ function printOfferRow(o,group){
  '<td>'+h(o.edition)+'<div class="cardMeta">'+h(o.language)+' · '+h(o.foil)+' · '+h(o.condition)+'</div></td>'+
  '<td>'+h(o.stock===null?"—":formatInt(o.stock))+'</td>'+
  '<td>'+(target?'<a href="'+h(target)+'" title="'+h(title)+'" target="_blank" rel="noopener noreferrer" class="offerLink">'+h(label)+'</a>':'—')+
- (searched&&o.link?'<div class="cardMeta"><a href="'+h(o.link)+'" target="_blank" rel="noopener noreferrer" class="offerLink">Consulta original ↗</a></div>':'')+'</td>'+
+ (searched&&cardLink?'<div class="cardMeta"><a href="'+h(cardLink)+'" title="Página individual da carta na LigaMagic" target="_blank" rel="noopener noreferrer" class="offerLink">Carta na Liga ↗</a></div>':'')+'</td>'+
  '</tr>';
 }
 function renderOffers(){

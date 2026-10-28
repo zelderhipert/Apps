@@ -48,3 +48,10 @@ Cada link por oferta passa a buscar **o nome da carta no catálogo da loja**, n�
 O módulo `../packages/mtg-report-kit/store-links.js` codifica o nome e usa os IDs de loja conhecidos. A Taberna usa o domínio `www.tabernageek.com.br` informado pelo usuário. Vila Geek, Black Game House e Fênix usam provisoriamente a rota do domínio `www.ligamagic.com.br` com o respectivo ID, pois os domínios customizados e o comportamento dessas buscas ainda não foram confirmados em navegação real. Magos agora usa o ID **621302**, confirmado pelo `shopping.json` de 27/10/2026; mesmo CSVs históricos sem `loja_id` podem abrir sua busca. O domínio customizado ainda não está confirmado, portanto o link usa a rota LigaMagic.
 
 O campo anterior `link_oferta` é mantido como fallback (consulta geral) e a skill acrescenta `loja_id` aos novos CSVs. Os relatórios históricos continuam compatíveis.
+
+
+## Lojas com domínio próprio e página de carta na LigaMagic
+
+Os cinco domínios foram informados pelo usuário: Taberna Geek (`www.tabernageek.com.br`), Vila Geek (`www.vilageekgames.com.br`), Black Game House (`www.blackgamehouse.com.br`), Fênix Geek House (`www.fenixhousetcg.com.br`) e Magos (`www.magosdacosta.com.br`). O código `store-links.js` usa a mesma taxonomia `?view=ecom/itens&page=1&id=...&busca=...` em todos, incluindo o ID confirmado da Magos (`621302`).
+
+O relatório HTML oferece **Buscar na loja** (página da carta filtrada no catálogo da loja) e **Carta na Liga** (`https://www.ligamagic.com.br/?view=cards/card&card=<nome inglês codificado>`). O segundo é uma página de carta, não `view=cards/lista` nem um carrinho. `link_oferta` continua no CSV por rastreabilidade da captura original, mas não precisa ser exibido como link de compra. A URL não seleciona automaticamente a impressão específica.
