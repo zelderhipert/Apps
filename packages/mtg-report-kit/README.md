@@ -19,3 +19,9 @@ Não afirme impressão exata apenas com o código de edição: diferentes númer
 O cache guarda **apenas URLs públicas e dados de impressão** no navegador, sem preços, decks ou estoque. Os requests são espaçados (~1,7 por segundo por aba, respeitando limitações do provedor) e disparados apenas para imagens visíveis. `stock-checker/art-ui.js` demonstra integração visual desacoplada e modal de cartas com duas faces.
 
 Teste automatizado: `node --test test/scryfall-images.test.cjs`.
+
+## URLs de estoque por loja
+
+`store-links.js` expõe `window.MTGStoreLinks.build({store,card,storeId})`, que devolve `{url,label,hostVerified,storeId}` ou `null` quando não há ID confiável. A função não usa rede e constrói links para buscas nominais de uma carta no e-commerce baseado na LigaMagic. Os IDs das quatro lojas conhecidas são checados antes de montar URLs; `URLSearchParams` cuida da codificação.
+
+Somente o domínio próprio da Taberna está confirmado pelo usuário. Para as outras lojas, a rota no domínio LigaMagic é provisória e requer teste. Não afirmar que uma busca identifica a impressão/versão específica de uma oferta.

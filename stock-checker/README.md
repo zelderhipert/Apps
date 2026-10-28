@@ -40,3 +40,11 @@ A camada `packages/mtg-report-kit/scryfall-images.js` faz lookup gradual (máxim
 **Privacidade:** não existe upload dos relatórios para Scryfall ou GitHub. Quando as imagens aparecem na tela, o navegador envia ao Scryfall apenas o nome da carta e, quando houver, sigla da edição/número de colecionador. As imagens dependem de conexão com a internet; os dados do stock-check permanecem utilizáveis offline.
 
 **Créditos e direitos:** imagens obtidas via Scryfall. A arte das cartas pertence à Wizards of the Coast e/ou respectivos titulares. Projeto não oficial e não endossado. Utilizamos a carta completa em vez de `art_crop`, preservando os créditos na moldura.
+
+## Consultar o estoque da loja
+
+Cada link por oferta passa a buscar **o nome da carta no catálogo da loja**, não um SKU/impressão individual. Seguimos a taxonomia `?view=ecom/itens&page=1&id=<ID>&busca=<carta>&txt_estoque=1...` fornecida no exemplo da Taberna Geek.
+
+O módulo `../packages/mtg-report-kit/store-links.js` codifica o nome e usa os IDs de loja conhecidos. A Taberna usa o domínio `www.tabernageek.com.br` informado pelo usuário. Vila Geek, Black Game House e Fênix usam provisoriamente a rota do domínio `www.ligamagic.com.br` com o respectivo ID, pois os domínios customizados e o comportamento dessas buscas ainda não foram confirmados em navegação real. Magos recebe uma busca por loja somente se o CSV trouxer `loja_id` observado na captura; caso contrário permanece o link da consulta geral.
+
+O campo anterior `link_oferta` é mantido como fallback (consulta geral) e a skill acrescenta `loja_id` aos novos CSVs. Os relatórios históricos continuam compatíveis.

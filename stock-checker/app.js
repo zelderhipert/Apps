@@ -3,6 +3,7 @@
 "use strict";
 const K=window.MTGReportKit;
 if(!K)throw new Error("mtg-report-kit não carregado");
+const storeSearch=window.MTGStoreLinks;
 const $=id=>document.getElementById(id);
 let data=null,activeTab="offers";
 let state={search:"",store:"",origin:"",sort:"name"};
@@ -21,7 +22,7 @@ function parseOffer(r){
  const delta=K.numberBR(r.diferenca_reais);
  const diff=K.numberBR(r.diferenca_pct);
  return {
-   raw:r,name:r.carta||"",store:r.loja||"",deck:r.deck||"",origin:r.origem||"",
+   raw:r,name:r.carta||"",store:r.loja||"",storeId:r.loja_id||"",deck:r.deck||"",origin:r.origem||"",
    price,reference,delta:delta??(price!==null&&reference!==null?price-reference:null),
    diff:diff??(price!==null&&reference>0?(price/reference-1)*100:null),
    stock:K.numberBR(r.estoque),edition:r.edicao||"Não informada",
@@ -105,6 +106,10 @@ function printOfferRow(o,group){
  const associated=group.filter(item=>offerKey(item)===offerKey(o));
  const origins=printTags(associated,"origin");
  const decks=[...new Set(associated.map(item=>item.deck).filter(Boolean))].sort().join(", ");
+ const searched=storeSearch?.build({store:o.store,card:o.name,storeId:o.storeId})||null;
+ const target=searched?.url||o.link;
+ const label=searched?.label||(o.link?"Consulta geral ↗":"—");
+ const title=searched?(searched.hostVerified?"Busca por nome no catálogo da loja; não seleciona impressão específica.":"Rota de busca por loja na LigaMagic; endereço da loja não confirmado."):"Link da consulta geral; não identifica loja ou edição.";
  return '<tr>'+
  '<td>'+artButton(o.name,o.edition,o.collector,"offer")+'</td>'+
  '<td><b>'+h(o.store)+'</b><div class="cardMeta">'+h(decks)+'</div><div>'+origins+'</div></td>'+
@@ -113,7 +118,7 @@ function printOfferRow(o,group){
  '<td><span class="'+pctColor(o.diff)+' money">'+K.formatPct(o.diff)+'</span></td>'+
  '<td>'+h(o.edition)+'<div class="cardMeta">'+h(o.language)+' · '+h(o.foil)+' · '+h(o.condition)+'</div></td>'+
  '<td>'+h(o.stock===null?"—":formatInt(o.stock))+'</td>'+
- '<td>'+(o.link?'<a href="'+h(o.link)+'" target="_blank" rel="noopener noreferrer" class="offerLink">LigaMagic ↗</a>':'—')+'</td>'+
+ '<td>'+(target?'<a href="'+h(target)+'" title="'+h(title)+'" target="_blank" rel="noopener noreferrer" class="offerLink">'+h(label)+'</a>':'—')+'</td>'+
  '</tr>';
 }
 function renderOffers(){
@@ -128,7 +133,7 @@ function renderOffers(){
    '<div><span class="offerLabel">MELHOR OFERTA</span><span class="offerPrice">'+amount(p.price)+'</span></div>'+
    '<div class="summaryDelta"><span class="offerLabel">DIFERENÇA %</span><span class="marker '+pctColor(p.diff)+'">'+(Number.isFinite(p.diff)?K.formatPct(p.diff):"Sem referência") +'</span></div>'+
    '<div class="chevron">›</div></summary>'+
-   '<div class="offerDetails"><div class="tableScroll"><table class="offerTable"><thead><tr><th>Arte</th><th>Loja / deck</th><th>Preço</th><th>Dif. R$</th><th>Dif. %</th><th>Versão / idioma / estado</th><th>Estoque</th><th>Consulta</th></tr></thead><tbody>'+
+   '<div class="offerDetails"><div class="tableScroll"><table class="offerTable"><thead><tr><th>Arte</th><th>Loja / deck</th><th>Preço</th><th>Dif. R$</th><th>Dif. %</th><th>Versão / idioma / estado</th><th>Estoque</th><th>Estoque da loja</th></tr></thead><tbody>'+
    g.offers.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity)).map(o=>printOfferRow(o,g.items)).join("")+
    '</tbody></table></div></div></details>';
  }).join("");
