@@ -16,6 +16,6 @@ Importe `scryfall-images.js` após `report-kit.js` e utilize `window.MTGCardImag
 
 Não afirme impressão exata apenas com o código de edição: diferentes números de colecionador e variantes de arte podem compartilhar o set. O módulo traduz certas siglas antigas da LigaMagic para códigos Scryfall (por exemplo `MI` → `MRD`). Os demais códigos são enviados sem alteração; se não corresponderem, a visualização recua para uma imagem ilustrativa.
 
-O cache guarda **apenas URLs públicas e dados de impressão** no navegador, sem preços, decks ou estoque. Os requests são espaçados e disparados apenas para imagens visíveis. `stock-checker/art-ui.js` demonstra integração visual desacoplada e modal de cartas com duas faces.
+O cache guarda **apenas URLs públicas e dados de impressão** no navegador, sem preços, decks ou estoque. Os requests são espaçados (~1,7 por segundo por aba, respeitando limitações do provedor) e disparados apenas para imagens visíveis. `stock-checker/art-ui.js` demonstra integração visual desacoplada e modal de cartas com duas faces.
 
 Teste automatizado: `node --test test/scryfall-images.test.cjs`.

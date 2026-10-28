@@ -28,7 +28,7 @@ function normalizeCard(card,kind){
 function createResolver(options={}){
  const fetcher=options.fetcher||((...a)=>fetch(...a));
  const storage=options.storage===undefined?(()=>{try{return localStorage;}catch{return null;}})():options.storage;
- const now=options.now||(()=>Date.now()),gap=Math.max(0,options.intervalMs??350);
+ const now=options.now||(()=>Date.now()),gap=Math.max(0,options.intervalMs??600);
  const memory=new Map();let serial=Promise.resolve(),last=0,blockedUntil=0;
  const key=(name,set,num)=>prefix+JSON.stringify([norm(name),setCode(set),collectorCode(num)]);
  function fromStorage(k){
