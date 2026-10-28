@@ -118,7 +118,8 @@ function printOfferRow(o,group){
  '<td><span class="'+pctColor(o.diff)+' money">'+K.formatPct(o.diff)+'</span></td>'+
  '<td>'+h(o.edition)+'<div class="cardMeta">'+h(o.language)+' · '+h(o.foil)+' · '+h(o.condition)+'</div></td>'+
  '<td>'+h(o.stock===null?"—":formatInt(o.stock))+'</td>'+
- '<td>'+(target?'<a href="'+h(target)+'" title="'+h(title)+'" target="_blank" rel="noopener noreferrer" class="offerLink">'+h(label)+'</a>':'—')+'</td>'+
+ '<td>'+(target?'<a href="'+h(target)+'" title="'+h(title)+'" target="_blank" rel="noopener noreferrer" class="offerLink">'+h(label)+'</a>':'—')+
+ (searched&&o.link?'<div class="cardMeta"><a href="'+h(o.link)+'" target="_blank" rel="noopener noreferrer" class="offerLink">Consulta original ↗</a></div>':'')+'</td>'+
  '</tr>';
 }
 function renderOffers(){
