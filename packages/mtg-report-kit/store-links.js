@@ -1,5 +1,6 @@
-/* Search links for the specific card in a LigaMagic-powered store catalogue.
-   Storefront URLs are search results, NOT a verified individual printing/listing. */
+/* LigaMagic card pages and storefront search links.
+ * Storefront URLs are card-name searches, never exact-print order links.
+ */
 (function(root,factory){
  const api=factory();
  if(typeof module==="object"&&module.exports)module.exports=api;
@@ -8,32 +9,34 @@
 "use strict";
 const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," ");
 const STORES={
- "taberna geek":{id:"41369",host:"www.tabernageek.com.br",verifiedHost:true},
- "magos":{id:"621302",host:"www.ligamagic.com.br",verifiedHost:false},
- "magos da costa":{id:"621302",host:"www.ligamagic.com.br",verifiedHost:false},
- "vila geek":{id:"49834",host:"www.ligamagic.com.br",verifiedHost:false},
- "vila geek vila velha":{id:"49834",host:"www.ligamagic.com.br",verifiedHost:false},
- "black game house":{id:"611044",host:"www.ligamagic.com.br",verifiedHost:false},
- "fenix geek house":{id:"45754",host:"www.ligamagic.com.br",verifiedHost:false},
- "fenix geek house (nova venecia)":{id:"45754",host:"www.ligamagic.com.br",verifiedHost:false}
+ "taberna geek":{id:"41369",host:"www.tabernageek.com.br"},
+ "vila geek":{id:"49834",host:"www.vilageekgames.com.br"},
+ "vila geek vila velha":{id:"49834",host:"www.vilageekgames.com.br"},
+ "black game house":{id:"611044",host:"www.blackgamehouse.com.br"},
+ "fenix geek house":{id:"45754",host:"www.fenixhousetcg.com.br"},
+ "fenix geek house (nova venecia)":{id:"45754",host:"www.fenixhousetcg.com.br"}
+ // Magos 621302 has no confirmed storefront domain; never invent one.
 };
+function safeName(value){const s=String(value||"").trim();return s&&s.length<=250?s:null;}
 function build({store,card,storeId}={}){
- const name=String(card||"").trim();
- if(!name||name.length>250)return null;
- const record=STORES[norm(store)];
- // Magos is unverified; only use an actual ID observed in the authorized shopping snapshot.
- const id=record?.id||(/magos/.test(norm(store))&&/^\d{2,10}$/.test(String(storeId||""))?String(storeId):null);
- if(!id)return null;
- if(record&&storeId&&String(storeId).trim()!==id)return null;
- const host=record?.host||"www.ligamagic.com.br";
+ const name=safeName(card),record=STORES[norm(store)];
+ if(!name||!record)return null;
+ if(storeId&&String(storeId).trim()!==record.id)return null;
  const params=new URLSearchParams([
-  ["view","ecom/itens"],["page","1"],["id",id],["comdesconto",""],
+  ["view","ecom/itens"],["page","1"],["id",record.id],["comdesconto",""],
   ["busca",name],["txt_filtro_multiestoque",""],["txt_order","1"],
   ["txt_limit","30"],["txt_estoque","1"],["btFiltrar","Filtrar"]
  ]);
- return {url:"https://"+host+"/?"+params.toString(),
-  label:record?.verifiedHost?"Buscar na loja ↗":"Buscar na loja (LigaMagic) ↗",
-  hostVerified:Boolean(record?.verifiedHost),storeId:id};
+ return {url:"https://"+record.host+"/?"+params.toString(),
+  label:"Buscar na loja ↗",hostVerified:true,storeId:record.id};
 }
-return {build,normalizeStore:norm};
+function cardPage(card){
+ const name=safeName(card);
+ if(!name)return null;
+ // For double-faced split names, LigaMagic normally indexes the front face.
+ const face=name.split(" // ",1)[0];
+ const params=new URLSearchParams([["view","cards/card"],["card",face]]);
+ return "https://www.ligamagic.com.br/?"+params.toString();
+}
+return {build,cardPage,normalizeStore:norm};
 });
