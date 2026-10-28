@@ -3,6 +3,7 @@ const assert=require("node:assert/strict");
 const S=require("../store-links.js");
 const domains=[
  ["Taberna Geek","www.tabernageek.com.br","41369"],
+ ["Magos","www.magosdacosta.com.br","621302"],
  ["Vila Geek Vila Velha","www.vilageekgames.com.br","49834"],
  ["Black Game House","www.blackgamehouse.com.br","611044"],
  ["Fênix Geek House (Nova Venécia)","www.fenixhousetcg.com.br","45754"]
@@ -23,8 +24,11 @@ test("Nomes Unicode e pontuação preservados em parâmetros",()=>{
  const url=new URL(S.build({store:"Fenix Geek House",card:"Éowyn, Shieldmaiden & Tide"}).url);
  assert.equal(url.searchParams.get("busca"),"Éowyn, Shieldmaiden & Tide");
 });
-test("Magos não aponta falsamente ao catálogo LigaMagic",()=>{
- assert.equal(S.build({store:"Magos",card:"Culling the Weak",storeId:"621302"}),null);
+test("Magos usa domínio próprio e ID 621302",()=>{
+ const u=new URL(S.build({store:"Magos",card:"Culling the Weak",storeId:"621302"}).url);
+ assert.equal(u.hostname,"www.magosdacosta.com.br");
+ assert.equal(u.searchParams.get("id"),"621302");
+ assert.equal(u.searchParams.get("busca"),"Culling the Weak");
 });
 test("ID incompatível e loja desconhecida não geram destino",()=>{
  assert.equal(S.build({store:"Taberna Geek",card:"Talisman of Dominance",storeId:"49834"}),null);
